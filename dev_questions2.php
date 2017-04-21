@@ -1,60 +1,70 @@
-<body>
-
 <?php
- 
-$connect=mysqli_connect("HOST_HERE","DB_HERE","PASS_HERE","USER_HERE");
 
-if(mysqli_connect_errno())
-{
-    echo "Error".mysqli_connect_error();
-}
-
-$query = "SELECT question FROM questions"; 
-$result = mysqli_query($connect,$query);
-
-$query_student = "SELECT * FROM STUDENT$"; 
-$result_student = mysqli_query($connect,$query_student);
-
-if (isset($_POST['submit_response'])){ 
-
-       	if($_POST['students_box'])
-        {
-         while ($row = mysqli_fetch_array($result)){
-            while ($row_student = mysqli_fetch_array($result_student)){
-
-            $question = mysqli_real_escape_string($connect,$row['question']);
-            $ID_student = mysqli_real_escape_string($connect,$row['ID']);
-
-            mysqli_query($connect, "UPDATE yhscs_seniors . STUDENT$ SET $question = $question + 1 WHERE STUDENT$ . ID  = $ID_student");
-         }
+	require("common.php");
+	
+	$query="SELECT * FROM users WHERE username = :username";
+    $query_params = array(':username' => $_SESSION['username']); 
+     try { 
+            $stmt = $db->prepare($query); 
+            $result = $stmt->execute($query_params); 
         } 
-       }
-    
-        header("Location: completed_vote.php");  
-        die("Redirecting to: completed_vote.php"); 
+        catch(PDOException $ex) 
+        { 
+            die("Failed to run query: " . $ex->getMessage()); 
+        } 
+        $row = $stmt->fetch(); 
+	
+	// user logged status 
+    if(empty($_SESSION['user']) || $row['user']['admin_rights'] === 0) 
+    { 
+        // If logged out redirect to login page. 
+        header("Location: index.php"); 
+         
+        // users can view private.php content without logging in without die statement 
+        die("Redirecting to index.php"); 
     }
-echo'<Form Name ="forms" Method ="POST" ACTION = "dev_questions.php">
-<h1>Questions</h1>
-<table>  ';
-    /*while($rows){
-        <tr> 
-            <td><?php echo $row['id']; ?></td> 
-            <td><?php echo htmlentities($row['question'], ENT_QUOTES, 'UTF-8'); ?></td> 
-            <td><select name = "students_box">
-            <option value = "0"> --Select Vote-- </option>";
-            <?php 
-		while($rows_student){
-		{
-    		echo "<option value = '<?php echo $row_student['ID'];?>'> <?php echo $row_student['name'];?> </option>";
+	
+	$query = "SELECT * FROM questions"; 
+	try {  
+		$stmt = $db->prepare($query); 
+		$stmt->execute();
+	} 
+	catch(PDOException $ex) {
+		die("Failed to run query: " . $ex->getMessage()); 
+	}
+	
+	$questions = $stmt->fetchAll();
+	
+	foreach ($questions as $question)
+	{
+		echo '<p>'.$question['question'].'</p><ol>';
+		
+		$query = "select id, count(*) AS Total from votes WHERE category = ? group by id order by Total DESC LIMIT 5"; 
+		try {  
+			$stmt = $db->prepare($query); 
+			$stmt->execute(array($question['id']));
+		} 
+		catch(PDOException $ex) {
+			die("Failed to run query: " . $ex->getMessage()); 
 		}
-	      } 
-            </td> </select>
-        </tr> 
-    }
-</table>
-<input type='submit' name = 'submit_response' value='Submit' action='POST'>
-<a href="index.php">Logout</a>
-</form>';*/
+		
+		$students = $stmt->fetchAll();
+		foreach ($students as $student) 
+		{
+			$query = "select name from STUDENT$ WHERE ID = ? LIMIT 1"; 
+			try {  
+				$stmt = $db->prepare($query); 
+				$stmt->execute(array($student['id']));
+			} 
+			catch(PDOException $ex) {
+				die("Failed to run query: " . $ex->getMessage()); 
+			}
+			$name = $stmt->fetch()['name'];
+			
+			echo '<li>'.$name.': '.$student['Total'].' votes</li>';
+		}
+		echo '</ol>';
+			
+	}
 
 ?>
-</body>

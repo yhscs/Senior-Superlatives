@@ -41,10 +41,9 @@
 <a href="dev_edit_account.php">Edit Account</a><br/> <br/>   
 <a href="dev_edit_questions.php">
 <img src="/img/Picture1.png" alt="Edit Questions" width="100" height="100" border="0">
-</a><a href="dev_questions.php">
-<img src="/img/Picture2.png" alt="Questions but pretend its results" width="100" height="100" border="0">
+</a><a href="dev_questions2.php">
+<img src="/img/Picture2.png" alt="Results" width="100" height="100" border="0">
 </a>
-<!--<a href="dev_questions2.php">Questions</a><br/> -->
 <a href="dev_logout.php"><img src="/img/Picture3.png" alt="Logout" width="100" height="100" border="0">
 </a>   
 <pre>Edit Questions  View Results     Logout</pre>
