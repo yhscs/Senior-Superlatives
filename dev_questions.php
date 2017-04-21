@@ -10,7 +10,7 @@
         die("Redirecting to index.php"); 
     } 
 
-    $query = "SELECT question FROM questions"; 
+    $query = "SELECT * FROM questions"; 
     try  {  
         $stmt = $db->prepare($query); 
         $stmt->execute(); 
@@ -37,24 +37,18 @@
     $rows_student = $stmt_student->fetchAll(); 
     
     if (isset($_POST['submit_response'])){ 
-
-       	if($_POST['students_box'])
-        {
-         foreach($rows as $row){
-            foreach($rows_student as $row_student){
-            //$query = "UPDATE STUDENT$ SET :questions = :questions + 1 WHERE STUDENT$ . ID = :id";
-            $query = "UPDATE `yhscs_seniors`.`STUDENT$` SET `:questions` = `:questions` + 1 WHERE `STUDENT$`.`ID` = :id";
-            $query_params = array(':questions' => $row['question'], ':id' => $row_student['ID']);
+         foreach($rows as $category){
+			 	$student = $_POST['category'.$category['id']];
+				$query = "INSERT INTO `votes` (`id`, `category`) VALUES (?, ?)";
+            	$query_params = array($student, $category['id']);
             try {
-             $stmt = $db->prepare($query); 
-             $stmt ->execute($query_params); 
+				 $stmt = $db->prepare($query); 
+				 $stmt ->execute($query_params); 
              } 
        
             catch(PDOException $ex) { 
-            die("Failed to run query: " . $ex->getMessage()); 
+            	die("Failed to run query: ". $ex->getMessage()); 
             }
-         }
-        } 
        }
        
         header("Location: completed_vote.php");  
@@ -80,15 +74,14 @@ body {
 <table>  
     <?php foreach($rows as $row): 
     ?> 
-        <tr> 
-            <td><?php echo $row['id']; ?></td> 
+        <tr>
             <td style="color:#FFFFFF"><?php echo htmlentities($row['question'], ENT_QUOTES, 'UTF-8'); ?></td> 
-            <td><select name = "students_box">
+            <td><select name = "category<?php echo $row['id']; ?>">
             <option value = "0"> --Select Vote-- </option>";
             <?php 
-		foreach($rows_student as $row_student) : ?> 
+		foreach($rows_student as $student) : ?> 
 		{
-    		echo "<option value = '<?php echo $row_student['ID'];?>'> <?php echo $row_student['name'];?> </option>";
+    		echo "<option value = '<?php echo $student['ID'];?>'> <?php echo $student['name'];?> </option>";
 		}
 	      <?php endforeach; ?>  
             </td> </select>
