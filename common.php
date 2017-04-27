@@ -1,4 +1,7 @@
 <?php 
+	require_once("keys.php");
+	//Checked by Sam. Status: Good.
+
 	// Initializes session. Sessions stores information on visitor. 
     // Unlike cookie, information stored on server-side, cannot be modified by visitor.
     // some cases, vistor must have cookies enabled
@@ -8,13 +11,6 @@
     header('Content-Type: text/html; charset=utf-8');
      
     
-
-    //database connect
-    $username = "USER_HERE"; 
-    $password = "PASS_HERE"; 
-    $host = "HOST_HERE"; 
-    $dbname = "DB_HERE"; 
-
 
     // MySQL server communicate with $options array using UTF-8 
     $options = array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'); 

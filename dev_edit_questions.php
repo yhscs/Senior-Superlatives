@@ -1,14 +1,34 @@
-
-<body>
-
 <?php
- 
-$connect=mysqli_connect("HOST_HERE","DB_HERE","PASS_HERE","USER_HERE");
+//Checked by sam. Status: Good.
+require("common.php");
 
-if(mysqli_connect_errno())
+function noHTML($input, $encoding = 'UTF-8')
 {
-    echo "Error".mysqli_connect_error();
+    return htmlentities($input, ENT_QUOTES | ENT_HTML5, $encoding, false);
 }
+
+if(!isset($_SESSION["user"])){
+	header("Location: index.php");
+	exit();
+}
+
+	$query="SELECT * FROM users WHERE username = :username";
+    $query_params = array(':username' => $_SESSION['username']); 
+     try { 
+            $stmt = $db->prepare($query); 
+            $result = $stmt->execute($query_params); 
+        } 
+        catch(PDOException $ex) 
+        { 
+            die("Failed to run query: " . $ex->getMessage()); 
+        } 
+        $row = $stmt->fetch();  
+    // user logged status 
+    if(empty($_SESSION['user']) || $row['user']['admin_rights'] == "0") 
+    { 
+        header("Location: index.php"); 
+        die("Redirecting to index.php"); 
+    }
 
 if (isset($_POST['add']))
 {
@@ -18,8 +38,28 @@ if (isset($_POST['add']))
    $error_msg = "Please Type in a question.";
    }
    else{
-   mysqli_query($connect,"INSERT INTO questions (question) VALUES ('$input_question')");
-   mysqli_query($connect,"ALTER TABLE  `STUDENT$` ADD  `$input_question` INT( 11 ) NOT NULL");
+	   
+		$query="INSERT INTO questions (question) VALUES ?;";
+		$query_params = array($input_question); 
+		try { 
+			$stmt = $db->prepare($query); 
+			$stmt->execute($query_params); 
+		} 
+		catch(PDOException $ex) 
+		{ 
+			die("Failed to run query: " . $ex->getMessage()); 
+		}
+
+		$query="ALTER TABLE `STUDENT$` ADD ? INT( 11 ) NOT NULL;";
+		$query_params = array($input_question); 
+		try { 
+			$stmt = $db->prepare($query); 
+			$stmt->execute($query_params); 
+		} 
+		catch(PDOException $ex) 
+		{ 
+			die("Failed to run query: " . $ex->getMessage()); 
+		}
    }
 }
 
@@ -31,17 +71,45 @@ if (isset($_POST['update']))
     for($i=0;$i<$count;$i++)
     {
         if(!empty($checkbox[$i])){
-        $question = mysqli_real_escape_string($connect,$checkbox[$i]); 
-        mysqli_query($connect,"DELETE FROM questions WHERE question = '$question'"); 
-        mysqli_query($connect,"ALTER TABLE STUDENT$ DROP $question;"); 
+			$question = $checkbox[$i]; 
+			
+			$query="DELETE FROM questions WHERE question = ?;";
+			$query_params = array($question); 
+			try { 
+				$stmt = $db->prepare($query); 
+				$stmt->execute($query_params); 
+			} 
+			catch(PDOException $ex) 
+			{ 
+				die("Failed to run query: " . $ex->getMessage()); 
+			}
+			
+			$query="ALTER TABLE STUDENT$ DROP ?;";
+			$query_params = array($question); 
+			try { 
+				$stmt = $db->prepare($query); 
+				$stmt->execute($query_params); 
+			} 
+			catch(PDOException $ex) 
+			{ 
+				die("Failed to run query: " . $ex->getMessage()); 
+			}
         } 
 
     } 
 
 } 
 
-$query = "SELECT * FROM questions"; 
-$result = mysqli_query($connect,$query);// execute query
+$query="SELECT * FROM questions";
+$query_params = array(); 
+try { 
+	$stmt = $db->prepare($query); 
+	$stmt->execute($query_params);
+} 
+catch(PDOException $ex) 
+{ 
+	die("Failed to run query: " . $ex->getMessage()); 
+}
 
 echo "<form action='dev_edit_questions.php' method='POST'>"; // submit page on itself
 
@@ -51,8 +119,8 @@ echo"<h1>Edit Questions</h1>
      Add or Delete Questions<br/>
      <input type = 'text' name = 'question' value = ''/></br>";
      if(isset($error_msg) && $error_msg) {
-    echo "<p style=\"color: red;\">*",htmlspecialchars($error_msg),"</p>";
-    }
+    	echo "<p style=\"color: red;\">*".noHTML($error_msg)."</p>";
+     }
 
 echo"<input type='submit' name = 'add' value='Add' action='POST'>
      </br></br>
@@ -65,14 +133,13 @@ echo"<input type='submit' name = 'add' value='Add' action='POST'>
 	<td align='center' bgcolor='#FFFFFF'><strong>Question</strong></td>
       </tr></tr>";
 
-while ($row = mysqli_fetch_array($result)){ //fetch array
-    $question=mysqli_real_escape_string($connect,$row['question']);
+while ($row = $stmt->fetch()){ //fetch array
     echo "<tr>
-            <td align='center' bgcolor='#FFFFFF'><input type='checkbox' name='checkbox[]' value='$question'></td>
-            <td bgcolor='#FFFFFF'>" . $row['question'] . " </td>
+            <td align='center' bgcolor='#FFFFFF'><input type='checkbox' name='checkbox[]' value='".noHTML($question)."'></td>
+            <td bgcolor='#FFFFFF'>" . noHTML($row['question']) . " </td>
          </tr>";
 }
-mysqli_free_result($result);
+
 echo "</table>";
 ?>
 </br>

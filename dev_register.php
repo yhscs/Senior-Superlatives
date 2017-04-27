@@ -1,4 +1,6 @@
 <?php 
+	//Checked by Sam. Status: Good.
+
     // execute common code
     // connect to database & start the session 
     require("common.php"); 
@@ -81,32 +83,13 @@
         { 
             die("This email address is already registered"); 
         } 
-         
-        // INSERT query used to add new rows to DB table. 
-        // parameters to protect against SQL injection attacks. 
-        $query = "INSERT INTO users (username, password, salt, email) VALUES ( :username, :password, :salt, :email)"; 
-         
-        // salt randomly generated
-	// protects against brute force/ rainbow table attacks 
-        // statement generates hex representation of 8 byte salt. hex no additional security, humans easier to read 
-        $salt = dechex(mt_rand(0, 2147483647)) . dechex(mt_rand(0, 2147483647)); 
-         
-        // hashes password with salt sercure in DB
-	// output is 64 byte hex string representing the 32 byte sha256 hash of password. 
-	// original password unrecoverable from hash 
-        $password = hash('sha256', $_POST['password'] . $salt); 
-         
-        // loop 65536 more times. Protect against brute force 
-	// attacker must compute the hash 65537 for each guess
-        for($round = 0; $round < 65536; $round++) 
-        { 
-            $password = hash('sha256', $password . $salt); 
-        } 
- 
-        // insertion into SQL query. Do not store password as plaintext but hash version. 
-        // Salt in plaintext is not sercurity risk
-        $query_params = array(':username' => $_POST['username'], ':password' => $password, ':salt' => $salt, ':email' => $_POST['email']); 
-         
+		
+		//Passes all checks, create user'
+		
+		$hash = password_hash($_POST['password'], PASSWORD_BCRYPT, ["cost" => 12]);
+		
+        $query = "INSERT INTO users (username, password, email) VALUES ( :username, :password, :email)"; 
+        $query_params = array(':username' => $_POST['username'], ':password' => $hash, ':email' => $_POST['email']); 
         try 
         { 
             // Execute the query to create the user 
@@ -130,13 +113,13 @@
 <h1>Add User</h1> 
 <form action="dev_register.php" method="post"> 
     Username:<br/> 
-    <input type="text" name="username" value=""/> 
+    <input type="text" name="username" value="" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false" required /> 
     <br/><br/> 
     E-Mail:<br/> 
-    <input type="text" name="email" value=""/> 
+    <input type="text" name="email" value="" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false" required /> 
     <br/><br/> 
     Password:<br/> 
-    <input type="password" name="password" value=""/>
+    <input type="password" name="password" value="" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false" required />
     <br/><br/> 
     <input type="submit" value="Register"/> 
 </form>

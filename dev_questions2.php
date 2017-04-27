@@ -1,7 +1,12 @@
 <?php
-
+	//Checked by sam. Status: Good
 	require("common.php");
 	
+	function noHTML($input, $encoding = 'UTF-8')
+	{
+		return htmlentities($input, ENT_QUOTES | ENT_HTML5, $encoding, false);
+	}
+
 	$query="SELECT * FROM users WHERE username = :username";
     $query_params = array(':username' => $_SESSION['username']); 
      try { 
@@ -15,8 +20,7 @@
         $row = $stmt->fetch(); 
 	
 	// user logged status 
-    if(empty($_SESSION['user']) || $row['user']['admin_rights'] === 0) 
-    { 
+    if(empty($_SESSION['user']) || $row['user']['admin_rights'] == "0"){ 
         // If logged out redirect to login page. 
         header("Location: index.php"); 
          
@@ -37,7 +41,7 @@
 	
 	foreach ($questions as $question)
 	{
-		echo '<p>'.$question['question'].'</p><ol>';
+		echo '<p>'.noHTML($question['question']).'</p><ol>';
 		
 		$query = "select id, count(*) AS Total from votes WHERE category = ? group by id order by Total DESC LIMIT 5"; 
 		try {  
@@ -61,7 +65,7 @@
 			}
 			$name = $stmt->fetch()['name'];
 			
-			echo '<li>'.$name.': '.$student['Total'].' votes</li>';
+			echo '<li>'.noHTML($name).': '.noHTML($student['Total']).' votes</li>';
 		}
 		echo '</ol>';
 			
