@@ -1,4 +1,7 @@
-Database for app:
+# Senior-Superlatives
+A web app for students to vote on senior superlatives such as "Best Dressed" and "Most Likely to Leave."
+
+MySQL database tables:
 
 ```SQL
 --
