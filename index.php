@@ -137,7 +137,8 @@ body {
     
     <p><a href="dev_register.php">Register to Login</a></p>
     <div>
-       <p>Designed and Developed by Darian Mach, Class of 2016</p>
+       <p>Designed and Developed by Darian Mach, Class of 2016<br>
+       Security Analysis by Sam Ellertson, Class of 2017</p>
     </div>
 
 </div>
